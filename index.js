@@ -13,58 +13,60 @@ const height = 540;
 const canvas = createCanvas(width, height);
 const ctx = canvas.getContext('2d');
 
-mobilenet.load()
-  .then((model) => {
-    loadImage('./resources/nestea.jpg').then((image) => {
-      ctx.drawImage(image, 0, 0, width, height);
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const tensor3d = tf.fromPixels(canvas);
-      model.classify(canvas)
-        .then((res) => {
-          console.log('res', res);
-        })
-        .catch((err) => {
-          console.log('error on classification', err);
-        });
-    }).catch((err) => { console.log('error on image load', err); });
-  })
-  .catch((err) => { console.log('error on model load', err); });
-
-/*
-tf.loadModel('file://./model/mobilenet.json')
-  .then((model) => {
-
-    loadImage('./resources/nestea.jpg').then((image) => {
-      ctx.drawImage(image, 0, 0, width, height);
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const tensor3d = tf.fromPixels(canvas);
-      model.predict(tensor3d.as4D(1, height, width, 3));
-
-      // const tensor = tf.tensor3d(new Uint8Array(imageData.data), [width, height, 3], 'int32').expandDims(0);
-      // model.predict(tensor);
-      // model.predict(tensor3d.expandDims(0));
-    }).catch((err) => { console.log('error', err); });
-
-    // const data = fs.readFileSync('./resources/nestea.jpg');
-    // const imageData = jpeg.decode(data);
-    // console.log(imageData);
-    // model.predict(tf.fromPixels(imageData));
-
-    // const image = new Image();
-    // image.src = 'resources/nestea.jpg';
-    // model.predict(tf.fromPixels(image));
-  })
-  .catch(err => console.log(err));
-*/
+let model;
+let mobilenetModel;
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '50mb' }));
 
 app.get('/', (req, res) => res.send('Hello Marcus!'));
 
-app.get('/classify', (req, res) => res.send('BANANA'));
+app.post('/classify', (req, res) => {
+  const { dataURL } = req.body;
+  const image = new Image();
+  image.src = dataURL;
+  ctx.drawImage(image, 0, 0, width, height);
+  model.predict(tf.fromPixels(canvas))
+    .then((predictions) => {
+      console.log(predictions);
+      res.json({
+        banana: '0.9',
+        orange: '0.1',
+      });
+    })
+    .catch((error) => {
+      res.json({ error: 'an error occurred' });
+    });
+});
 
-app.listen(port, () => console.log('marcus has started'));
+app.post('/mobilenet', (req, res) => {
+  const { dataURL } = req.body;
+  const image = new Image();
+  image.src = dataURL;
+  ctx.drawImage(image, 0, 0, width, height);
+  mobilenetModel.classify(canvas)
+    .then((predictions) => {
+      console.log(predictions);
+      res.json(predictions);
+    })
+    .catch((error) => {
+      res.json({ error: 'an error occurred' });
+    });
+});
+
+tf.loadModel('file://./model/model.json')
+  .then((res) => {
+    model = res;
+  })
+  .catch(err => console.log(err));
+
+mobilenet.load()
+  .then((res) => {
+    mobilenetModel = res;
+    app.listen(port, () => console.log('marcus has started'));
+  })
+  .catch(err => console.log('error loadign mobilenet model', err));
