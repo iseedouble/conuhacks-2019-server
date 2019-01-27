@@ -11,9 +11,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tensorflow/tfjs-node": "^0.2.3",
     "body-parser": "^1.18.3",
+    "canvas": "^2.3.1",
     "cors": "^2.8.5",
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "get-image-data": "^3.0.1"
   },
   "devDependencies": {
     "eslint": "^5.12.1",
