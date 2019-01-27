@@ -1,18 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const tf = require('@tensorflow/tfjs-node');
-const image = require('get-image-data');
-const cv = require('');
+//const tf = require('@tensorflow/tfjs-node');
+// const image = require('get-image-data');
+// const cv = require('');
 
-tf.loadModel('file://./model/model.json')
-  .then((model) => {
-    image('./resources/doritos.png', (err, data) => {
-      console.log(data);
-      model.predict(tf.fromPixels(data));
-    });
-  })
-  .catch(err => console.log(err));
+// tf.loadModel('file://./model/model.json')
+//   .then((model) => {
+//     image('./resources/doritos.png', (err, data) => {
+//       console.log(data);
+//       model.predict(tf.fromPixels(data));
+//     });
+//   })
+//   .catch(err => console.log(err));
 
 const app = express();
 const port = process.env.PORT || 3000;
