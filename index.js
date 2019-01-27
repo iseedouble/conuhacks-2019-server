@@ -21,7 +21,11 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => res.send('Hello Marcus!'));
-
 app.get('/classify', (req, res) => res.send('BANANA'));
+
+app.post('/photo', (req, res) => {
+  console.log('Received post: ');
+  console.log(req.body.photo);
+})
 
 app.listen(port, () => console.log('marcus has started'));
