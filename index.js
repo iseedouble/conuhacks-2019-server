@@ -2,17 +2,38 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const tf = require('@tensorflow/tfjs-node');
+const mobilenet = require('@tensorflow-models/mobilenet');
 const fs = require('fs');
 const jpeg = require('jpeg-js');
 const { createCanvas, loadImage, Image } = require('canvas');
 
+const width = 640;
+const height = 540;
+
+const canvas = createCanvas(width, height);
+const ctx = canvas.getContext('2d');
+
+mobilenet.load()
+  .then((model) => {
+    loadImage('./resources/nestea.jpg').then((image) => {
+      ctx.drawImage(image, 0, 0, width, height);
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const tensor3d = tf.fromPixels(canvas);
+      model.classify(canvas)
+        .then((res) => {
+          console.log('res', res);
+        })
+        .catch((err) => {
+          console.log('error on classification', err);
+        });
+    }).catch((err) => { console.log('error on image load', err); });
+  })
+  .catch((err) => { console.log('error on model load', err); });
+
+/*
 tf.loadModel('file://./model/mobilenet.json')
   .then((model) => {
-    const width = 640;
-    const height = 540;
 
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
     loadImage('./resources/nestea.jpg').then((image) => {
       ctx.drawImage(image, 0, 0, width, height);
       const imageData = ctx.getImageData(0, 0, width, height);
@@ -34,6 +55,7 @@ tf.loadModel('file://./model/mobilenet.json')
     // model.predict(tf.fromPixels(image));
   })
   .catch(err => console.log(err));
+*/
 
 const app = express();
 const port = process.env.PORT || 3000;
