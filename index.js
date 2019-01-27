@@ -18,7 +18,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50MB'}));
 
 app.get('/', (req, res) => res.send('Hello Marcus!'));
 app.get('/classify', (req, res) => res.send('BANANA'));
