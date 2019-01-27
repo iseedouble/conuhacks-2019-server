@@ -2,15 +2,36 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const tf = require('@tensorflow/tfjs-node');
-const image = require('get-image-data');
-const cv = require('');
+const fs = require('fs');
+const jpeg = require('jpeg-js');
+const { createCanvas, loadImage, Image } = require('canvas');
 
-tf.loadModel('file://./model/model.json')
+tf.loadModel('file://./model/mobilenet.json')
   .then((model) => {
-    image('./resources/doritos.png', (err, data) => {
-      console.log(data);
-      model.predict(tf.fromPixels(data));
-    });
+    const width = 640;
+    const height = 540;
+
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+    loadImage('./resources/nestea.jpg').then((image) => {
+      ctx.drawImage(image, 0, 0, width, height);
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const tensor3d = tf.fromPixels(canvas);
+      model.predict(tensor3d.as4D(1, height, width, 3));
+
+      // const tensor = tf.tensor3d(new Uint8Array(imageData.data), [width, height, 3], 'int32').expandDims(0);
+      // model.predict(tensor);
+      // model.predict(tensor3d.expandDims(0));
+    }).catch((err) => { console.log('error', err); });
+
+    // const data = fs.readFileSync('./resources/nestea.jpg');
+    // const imageData = jpeg.decode(data);
+    // console.log(imageData);
+    // model.predict(tf.fromPixels(imageData));
+
+    // const image = new Image();
+    // image.src = 'resources/nestea.jpg';
+    // model.predict(tf.fromPixels(image));
   })
   .catch(err => console.log(err));
 
