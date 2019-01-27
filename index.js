@@ -43,6 +43,12 @@ app.post('/classify', (req, res) => {
     });
 });
 
+app.post('/photo', (req, res) => {
+  fs.writeFileSync('out.png', req.body.photo, 'base64');
+  console.log('Saved.');
+  res.send('daved the file');
+});
+
 app.post('/mobilenet', (req, res) => {
   const { dataURL } = req.body;
   const image = new Image();
